@@ -22,15 +22,12 @@ public class ChatService {
 
     public String processMessage(String message) {
         try {
-            // FIX 2: The ADK requires text to be wrapped in a Content/Part object
             Content userMsg = Content.fromParts(Part.fromText(message));
 
-            // FIX 3: Call runAsync() passing the User ID, Session ID, and Content
             Flowable<Event> events = runner.runAsync(session.userId(), session.id(), userMsg);
 
             StringBuilder responseBuilder = new StringBuilder();
 
-            // FIX 4: Block the reactive stream and collect the agent's response events
             events.blockingForEach(event -> {
                 // If it's a final response event, grab the text
                 if (event.finalResponse()) {
