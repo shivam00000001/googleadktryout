@@ -7,11 +7,11 @@ It showcases how a primary AI assistant can dynamically route specialized tasks 
 
 
 ## 🌟 Key Features
-* **Multi-Agent Routing:** A "General Assistant" agent that intercepts all prompts and routes domain-specific queries to a "Weather & Time Specialist" sub-agent.
-* **Autonomous Tool Execution:** The sub-agent is equipped with a Java Tool that triggers a Spring Cloud OpenFeign client to fetch live data from the internet (`wttr.in`).
-* **Swagger UI Integration:** A polished, interactive web interface for stakeholders to test the agents.
-* **Transparent "Thought" Logging:** Configured debug logs that expose the AI's internal decision-making process, tool execution, and HTTP requests in the console.
-
+* **Intelligent Routing:** A "General Assistant" agent that analyzes natural language intent and routes domain-specific queries to either a Weather Specialist or a Finance Specialist.
+* **Weather & Time Specialist:** Extracts target cities from prompts and uses a Spring Cloud OpenFeign client to fetch live meteorological data from `wttr.in`.
+* **Finance Specialist:** Autonomously converts conversational queries (e.g., "Apple" or "Bitcoin") into official Yahoo Finance tickers (e.g., `AAPL`, `BTC-USD`) and fetches real-time market prices using the open Yahoo Finance v8 API.
+* **Resilient Tool Execution:** Java tools parse massive JSON payloads internally to save LLM tokens and handle network timeouts gracefully by feeding system directives back to the AI.
+* **Swagger UI Integration:** A polished, interactive web interface for stakeholders to test the agentic routing.
 ---
 
 ## 📋 Prerequisites
