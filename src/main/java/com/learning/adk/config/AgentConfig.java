@@ -1,5 +1,7 @@
-package com.learning.adk.config;import com.google.adk.agents.LlmAgent;
+package com.learning.adk.config;
+import com.google.adk.agents.LlmAgent;
 import com.google.adk.tools.FunctionTool;
+import com.learning.adk.tool.FinanceTool;
 import com.learning.adk.tool.WeatherTool;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -14,9 +16,8 @@ public class AgentConfig {
     private String modelName;
 
     @Bean
-    public LlmAgent mainAgent(WeatherTool weatherTool) {
+    public LlmAgent mainAgent(WeatherTool weatherTool, FinanceTool financeTool) {
 
-        // FIX: Stronger instructions forbidding reverse-routing
         LlmAgent weatherSubAgent = LlmAgent.builder()
                 .name("weather_specialist")
                 .description("Handles all weather and local time queries.")
@@ -25,13 +26,27 @@ public class AgentConfig {
                 .tools(List.of(FunctionTool.create(weatherTool, "getWeather")))
                 .build();
 
-        // FIX: Clarify that the sub-agent handles time as well
+        // UPDATED: Finance Agent Instructions for both crypto and traditional stocks
+        LlmAgent financeSubAgent = LlmAgent.builder()
+                .name("finance_specialist")
+                .description("Handles cryptocurrency, stock market queries, and financial suggestions.")
+                .model(modelName)
+                .instruction("You are a financial specialist. You can suggest and verify stocks or crypto using your general knowledge. " +
+                        "To get live prices, use the getPrice tool. You MUST convert natural language (e.g., 'Apple', 'Bitcoin') " +
+                        "into official Yahoo Finance tickers (e.g., 'AAPL', 'BTC-USD') before calling the tool. " +
+                        "NEVER transfer back to the general_assistant.")
+                .tools(List.of(FunctionTool.create(financeTool, "getPrice")))
+                .build();
+
         return LlmAgent.builder()
                 .name("general_assistant")
                 .description("Primary assistant that routes specific tasks.")
                 .model(modelName)
-                .instruction("You are a helpful assistant. If the user asks for the weather OR the current time in a city, delegate the request to the weather_specialist.")
-                .subAgents(List.of(weatherSubAgent))
+                .instruction("You are a helpful assistant. " +
+                        "If the user asks for weather or time, transfer to weather_specialist. " +
+                        "If the user asks for crypto, stock prices, or financial suggestions, transfer to finance_specialist. " +
+                        "Otherwise, answer the question yourself.")
+                .subAgents(List.of(weatherSubAgent, financeSubAgent))
                 .build();
     }
 }
